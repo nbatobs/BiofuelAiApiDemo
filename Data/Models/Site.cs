@@ -22,6 +22,7 @@ public class Site
     
     public bool AutoRetrainingEnabled { get; set; }
     public int? RetrainingFrequencyDays { get; set; }
+    public bool TrainOnEveryUpload { get; set; }
     
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

@@ -58,12 +58,13 @@ public class AppDbContext : DbContext
 
         // ===== Relationship Configurations =====
         
-        // User -> Company
+        // User -> Company (optional for individual users/consultants)
         modelBuilder.Entity<User>()
             .HasOne(u => u.Company)
             .WithMany()
             .HasForeignKey(u => u.CompanyId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull)
+            .IsRequired(false);
 
         // Site -> Company
         modelBuilder.Entity<Site>()
