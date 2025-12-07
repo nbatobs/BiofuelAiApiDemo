@@ -6,9 +6,9 @@ public class User
     public int Id { get; set; }
 
     public int? CompanyId { get; set; }
-    public Company Company { get; set; }
+    public Company? Company { get; set; }
 
-    public string Email { get; set; }
+    public required string Email { get; set; }
     public UserRole Role { get; set; }
     public bool IsIndividual { get; set; }    
     public DateTime CreatedAt { get; set; }

@@ -7,7 +7,7 @@ public class TrainingJob
     public int Id { get; set; }
     
     public int SiteId { get; set; }
-    public Site Site { get; set; }
+    public required Site Site { get; set; }
     
     public DateTime ScheduledAt { get; set; }
     public DateTime? StartedAt { get; set; }
@@ -20,12 +20,12 @@ public class TrainingJob
     
     // Result
     public int? ModelVersionId { get; set; }
-    public ModelVersion ModelVersion { get; set; }
+    public ModelVersion? ModelVersion { get; set; }
     
-    public string ConfigJson { get; set; } // Training hyperparameters, settings
-    public string LogsJson { get; set; } // Training logs, metrics over time
-    public string ErrorMessage { get; set; }
+    public required string ConfigJson { get; set; } // Training hyperparameters, settings
+    public string? LogsJson { get; set; } // Training logs, metrics over time
+    public string? ErrorMessage { get; set; }
     
     public int? TriggeredById { get; set; }
-    public User TriggeredBy { get; set; }
+    public User? TriggeredBy { get; set; }
 }

@@ -5,16 +5,16 @@ public class Site
     public int Id { get; set; }
     
     public int CompanyId { get; set; }
-    public Company Company { get; set; }
+    public required Company Company { get; set; }
     
-    public string SiteName { get; set; }
-    public string Location { get; set; }
-    public string TimeZone { get; set; } // e.g. "America/New_York"
+    public required string SiteName { get; set; }
+    public string? Location { get; set; }
+    public string? TimeZone { get; set; } // e.g. "America/New_York"
     
     public int? CurrentSchemaVersionId { get; set; }
     
     // Site configuration
-    public string ConfigJson { get; set; } // Equipment IDs, thresholds, custom settings
+    public required string ConfigJson { get; set; } // Equipment IDs, thresholds, custom settings
     
     // Automation settings
     public bool AutoInferenceEnabled { get; set; }
