@@ -21,12 +21,6 @@ public class TrainingJobConfiguration : IEntityTypeConfiguration<TrainingJob>
             .IsRequired()
             .HasColumnType("jsonb");
 
-        builder.Property(t => t.LogsJson)
-            .HasColumnType("jsonb");
-
-        builder.Property(t => t.ErrorMessage)
-            .HasMaxLength(2000);
-
         // Relationships
         builder.HasOne(t => t.Site)
             .WithMany()

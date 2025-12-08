@@ -12,9 +12,6 @@ public class DataRow
     
     public DateTime Date { get; set; }
     
-    // Track data source for each field (SCADA, Manual, Lab)
-    public required string DataSourcesJson { get; set; }
-    
     // All sensor readings stored as JSONB for flexibility
     // Structure defined by SchemaVersion.SchemaDefinition
     public required string SensorDataJson { get; set; }

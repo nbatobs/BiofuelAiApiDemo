@@ -11,11 +11,6 @@ public class DataRowConfiguration : IEntityTypeConfiguration<DataRow>
         // Table and schema
         builder.ToTable("DataRows", "data");
 
-        // Properties
-        builder.Property(d => d.DataSourcesJson)
-            .IsRequired()
-            .HasColumnType("jsonb");
-
         builder.Property(d => d.SensorDataJson)
             .IsRequired()
             .HasColumnType("jsonb");
