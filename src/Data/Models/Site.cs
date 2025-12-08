@@ -24,6 +24,10 @@ public class Site
     public int? RetrainingFrequencyDays { get; set; }
     public bool TrainOnEveryUpload { get; set; }
     
+    // Power BI integration
+    public bool PowerBiEnabled { get; set; }
+    public string? PowerBiWorkspaceId { get; set; }
+    
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
