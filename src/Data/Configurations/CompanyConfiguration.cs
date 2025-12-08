@@ -18,5 +18,9 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
 
         builder.Property(c => c.CreatedAt)
             .IsRequired();
+
+        // Indexes
+        builder.HasIndex(c => c.Name)
+            .IsUnique();
     }
 }

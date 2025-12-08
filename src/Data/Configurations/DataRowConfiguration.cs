@@ -29,7 +29,8 @@ public class DataRowConfiguration : IEntityTypeConfiguration<DataRow>
         builder.HasOne(d => d.SchemaVersion)
             .WithMany()
             .HasForeignKey(d => d.SchemaVersionId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull)
+            .IsRequired(false);
 
         // Indexes (critical for time-series queries)
         builder.HasIndex(d => new { d.SiteId, d.Date });

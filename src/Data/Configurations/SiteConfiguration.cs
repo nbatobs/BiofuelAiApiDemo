@@ -35,7 +35,7 @@ public class SiteConfiguration : IEntityTypeConfiguration<Site>
         builder.HasOne(s => s.Company)
             .WithMany()
             .HasForeignKey(s => s.CompanyId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne<SiteDataSchema>()
             .WithMany()

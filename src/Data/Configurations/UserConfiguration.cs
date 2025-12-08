@@ -28,7 +28,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasOne(u => u.Company)
             .WithMany()
             .HasForeignKey(u => u.CompanyId)
-            .OnDelete(DeleteBehavior.SetNull)
+            .OnDelete(DeleteBehavior.Cascade)
             .IsRequired(false);
 
         // Indexes
