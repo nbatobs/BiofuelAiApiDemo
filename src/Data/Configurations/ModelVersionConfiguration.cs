@@ -16,14 +16,6 @@ public class ModelVersionConfiguration : IEntityTypeConfiguration<ModelVersion>
             .IsRequired()
             .HasMaxLength(1000);
 
-        builder.Property(m => m.ModelFormat)
-            .IsRequired()
-            .HasMaxLength(50);
-
-        builder.Property(m => m.ModelFramework)
-            .IsRequired()
-            .HasMaxLength(100);
-
         builder.Property(m => m.MetricsJson)
             .HasColumnType("jsonb");
 
