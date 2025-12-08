@@ -23,4 +23,5 @@ public class InferenceRequest
     
     public DateTime? CompletedAt { get; set; }
     public long? DurationMs { get; set; }
+    public string? ErrorMessage { get; set; }
 }

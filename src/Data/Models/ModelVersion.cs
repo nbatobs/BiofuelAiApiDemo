@@ -12,5 +12,5 @@ public class ModelVersion
     public DateTime? TrainingDataEnd { get; set; }
     public string? MetricsJson { get; set; }
     public bool IsActive { get; set; }
-    public float VersionNumber { get; set; }
+    public decimal VersionNumber { get; set; }
 }

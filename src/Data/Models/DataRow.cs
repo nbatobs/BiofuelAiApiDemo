@@ -7,8 +7,8 @@ public class DataRow
     public int SiteId { get; set; }
     public required Site Site { get; set; }
     
-    public int SchemaVersionId { get; set; }
-    public required SiteDataSchema SchemaVersion { get; set; }
+    public int? SchemaVersionId { get; set; }
+    public SiteDataSchema? SchemaVersion { get; set; }
     
     public DateTime Date { get; set; }
     
