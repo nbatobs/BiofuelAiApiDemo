@@ -21,9 +21,6 @@ public class InferenceRequestConfiguration : IEntityTypeConfiguration<InferenceR
             .IsRequired()
             .HasColumnType("jsonb");
 
-        builder.Property(i => i.ErrorMessage)
-            .HasMaxLength(2000);
-
         // Relationships
         builder.HasOne(i => i.Site)
             .WithMany()

@@ -23,9 +23,6 @@ public class TrainingJob
     public ModelVersion? ModelVersion { get; set; }
     
     public required string ConfigJson { get; set; } // Training hyperparameters, settings
-    public string? LogsJson { get; set; } // Training logs, metrics over time
-    public string? ErrorMessage { get; set; }
-    
     public int? TriggeredById { get; set; }
     public User? TriggeredBy { get; set; }
 }
