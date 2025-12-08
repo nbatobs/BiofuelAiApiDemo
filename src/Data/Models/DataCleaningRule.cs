@@ -19,5 +19,5 @@ public class DataCleaningRule
     public User? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
 
-    public float VersionNumber { get; set; }
+    public decimal VersionNumber { get; set; }
 }
