@@ -12,8 +12,17 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.ToTable("Users", "core");
 
         // Properties
+        builder.Property(u => u.IdpSub)
+            .HasMaxLength(256);
+
+        builder.Property(u => u.IdpIssuer)
+            .HasMaxLength(512);
+
         builder.Property(u => u.Email)
             .IsRequired()
+            .HasMaxLength(256);
+
+        builder.Property(u => u.Name)
             .HasMaxLength(256);
 
         builder.Property(u => u.Role)
@@ -22,6 +31,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(50);
 
         builder.Property(u => u.IsIndividual)
+            .IsRequired();
+
+        builder.Property(u => u.CreatedAt)
+            .IsRequired();
+
+        builder.Property(u => u.UpdatedAt)
             .IsRequired();
 
         // Relationships
@@ -34,6 +49,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         // Indexes
         builder.HasIndex(u => u.Email)
             .IsUnique();
+
+        builder.HasIndex(u => new { u.IdpIssuer, u.IdpSub })
+            .IsUnique()
+            .HasFilter("\"IdpSub\" IS NOT NULL AND \"IdpIssuer\" IS NOT NULL");
 
         builder.HasIndex(u => u.CompanyId);
     }
