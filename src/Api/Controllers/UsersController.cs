@@ -19,7 +19,7 @@ public class UsersController : ControllerBase
 
     /// <summary>
     /// Get current user information. This endpoint automatically creates a user record
-    /// in the local database if one doesn't exist for the authenticated Azure B2C user.
+    /// in the local database if one doesn't exist for the authenticated user.
     /// </summary>
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUser()
@@ -44,7 +44,8 @@ public class UsersController : ControllerBase
         // Extract email from claims
         var email = User.FindFirst(ClaimTypes.Email)?.Value 
             ?? User.FindFirst("emails")?.Value 
-            ?? User.FindFirst("email")?.Value 
+            ?? User.FindFirst("email")?.Value
+            ?? User.FindFirst("preferred_username")?.Value
             ?? "";
         
         if (string.IsNullOrEmpty(email))

@@ -1,18 +1,19 @@
-# Azure B2C Integration - Refactored
+# Microsoft Entra External ID Integration - Refactored
 
 ## What Changed
 
 ### Removed (Old Approach ❌)
 - **AuthController** - No login/register endpoints needed
-- **IAuthService/AuthService** - Azure B2C handles authentication
-- **Login/Register DTOs** - Not needed with B2C flow
+- **IAuthService/AuthService** - Microsoft Entra External ID handles authentication
+- **Login/Register DTOs** - Not needed with External ID flow
 
 ### Added (Correct Approach ✅)
 - **IUserService/UserService** - Lightweight service for user lookup/creation from JWT claims
 - **UsersController** - Single `/api/users/me` endpoint
 - **User Model Updates**:
-  - `AzureB2CObjectId` - Maps to B2C `sub` claim (unique identifier)
-  - `Name` - User's display name from B2C
+  - `IdpSub` - Maps to External ID `sub` claim (unique identifier)
+  - `IdpIssuer` - Maps to `iss` claim (issuer identifier)
+  - `Name` - User's display name from External ID
   - `UpdatedAt` - Track user info updates
 
 ## How It Works
@@ -20,18 +21,18 @@
 ### Authentication Flow
 
 ```
-1. Frontend redirects to Azure B2C
+1. Frontend redirects to Microsoft Entra External ID
    ↓
-2. User authenticates with B2C
+2. User authenticates with External ID
    ↓
-3. B2C returns JWT token to frontend
+3. External ID returns JWT token to frontend
    ↓
 4. Frontend includes JWT in API requests
    Authorization: Bearer <token>
    ↓
 5. API validates JWT (Microsoft.Identity.Web)
    ↓
-6. API extracts claims (sub, email, name)
+6. API extracts claims (sub, iss, email, name)
    ↓
 7. API looks up/creates user in local DB
 ```
@@ -39,7 +40,7 @@
 ### Key Endpoints
 
 **`GET /api/users/me`**
-- Extracts B2C claims from JWT
+- Extracts External ID claims from JWT
 - Creates user in DB if doesn't exist
 - Updates user info if changed
 - Returns local user record
@@ -56,20 +57,20 @@ All controllers should use this pattern to get the current user:
 ```csharp
 private async Task<(int? userId, string? error)> GetCurrentUserIdAsync()
 {
-    var azureB2CObjectId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+    var idpSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
         ?? User.FindFirst("sub")?.Value
         ?? User.FindFirst("oid")?.Value;
     
-    if (string.IsNullOrEmpty(azureB2CObjectId))
+    if (string.IsNullOrEmpty(idpSub))
         return (null, "User identifier not found in token");
 
-    var user = await _userService.GetUserByAzureB2CIdAsync(azureB2CObjectId);
+    var idpIssuer = User.FindFirst("iss")?.Value;
+    if (string.IsNullOrEmpty(idpIssuer))
+        return (null, "Issuer not found in token");
+
+    var user = await _userService.GetUserByIdpSubAsync(idpSub, idpIssuer);
     if (user == null)
         return (null, "User not found. Call /api/users/me first.");
-
-    return (user.Id, null);
-}
-```
 
 ## Database Migration Needed
 
@@ -77,7 +78,7 @@ Run this to add the new User fields:
 
 ```bash
 cd src/Data
-dotnet ef migrations add AddAzureB2CFieldsToUser --startup-project ../Api
+dotnet ef migrations add AddIdpFieldsToUser --startup-project ../Api
 dotnet ef database update --startup-project ../Api
 ```
 
@@ -87,11 +88,15 @@ In `appsettings.json`:
 
 ```json
 {
-  "AzureAdB2C": {
-    "Instance": "https://<tenant>.b2clogin.com",
+  "BackendApi": {
+    "Instance": "https://<tenant>.ciamlogin.com/",
     "Domain": "<tenant>.onmicrosoft.com",
     "TenantId": "<guid>",
     "ClientId": "<guid>",
+    "SignUpSignInPolicyId": "B2C_1_signupsignin"
+  }
+}
+``` "ClientId": "<guid>",
     "SignUpSignInPolicyId": "B2C_1_susi"
   }
 }
@@ -148,17 +153,18 @@ public async Task<IActionResult> SiteEndpoint(int siteId)
 
 ## Benefits of This Approach
 
-✅ **No password management** - Azure B2C handles it
+✅ **No password management** - Microsoft Entra External ID handles it
 ✅ **Auto user sync** - Users created on first API call
 ✅ **Claims-based** - All user info in JWT
 ✅ **Scalable** - No session state needed
 ✅ **Secure** - Microsoft-managed identity platform
 ✅ **Simple** - Fewer endpoints and less code
-
+✅ **IDP-agnostic** - Uses standard `sub` and `iss` claims, can switch IDPs if needed
 ## Next Steps
 
 1. Run the database migration
-2. Configure Azure B2C tenant settings
+2. Configure Microsoft Entra External ID tenant settings
 3. Test `/api/users/me` endpoint
 4. Implement remaining controllers (Companies, Sites, Uploads)
+5. Add proper CORS policy for your frontend domaines, Uploads)
 5. Add proper CORS policy for your frontend domain

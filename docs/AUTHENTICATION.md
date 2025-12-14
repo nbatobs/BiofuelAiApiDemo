@@ -1,19 +1,19 @@
-# Azure AD B2C Authentication Setup
+# Microsoft Entra External ID Authentication Setup
 
-This API uses Azure AD B2C as the Identity Provider (IDP) for authentication and authorization.
+This API uses Microsoft Entra External ID (formerly Azure AD B2C) as the Identity Provider (IDP) for authentication and authorization.
 
 ## Configuration Steps
 
-### 1. Azure B2C Setup
+### 1. Microsoft Entra External ID Setup
 
-Before running the API, you need to configure your Azure AD B2C tenant:
+Before running the API, you need to configure your Microsoft Entra External ID tenant:
 
-1. **Create an Azure AD B2C Tenant** (if not already done)
-   - Go to Azure Portal → Create a resource → Azure AD B2C
-   - Follow the wizard to create your tenant
+1. **Create a Microsoft Entra External ID Tenant** (if not already done)
+   - Go to Azure Portal → Microsoft Entra External ID
+   - Create your external tenant
 
 2. **Register the API Application**
-   - In your B2C tenant, go to "App registrations" → "New registration"
+   - In your External ID tenant, go to "App registrations" → "New registration"
    - Name: `BiofuelAiApi`
    - Supported account types: "Accounts in this organizational directory only"
    - Register the application
@@ -25,47 +25,40 @@ Before running the API, you need to configure your Azure AD B2C tenant:
    - Admin consent display name: "Access BiofuelAI API"
    - Save the scope
 
-4. **Create User Flows (Policies)**
+4. **Create User Flows**
    - Go to "User flows" → "New user flow"
-   - Create the following flows:
-     - **Sign up and sign in**: `B2C_1_susi`
-     - **Password reset**: `B2C_1_reset`
-     - **Profile editing**: `B2C_1_edit_profile`
-
-5. **Configure Custom Attributes** (Optional)
-   - Go to "User attributes" → Add custom attribute
-   - Add `UserRole` attribute to store user roles
-   - Include this in your user flows
+   - Create sign-up and sign-in flow: `B2C_1_signupsignin`
+   - Configure identity providers and user attributes
 
 ### 2. Update appsettings.json
 
-Update the `AzureAdB2C` section in both `appsettings.json` and `appsettings.Development.json`:
+Update the `BackendApi` section in both `appsettings.json` and `appsettings.Development.json`:
 
 ```json
 {
-  "AzureAdB2C": {
-    "Instance": "https://<your-tenant-name>.b2clogin.com",
+  "BackendApi": {
+    "Instance": "https://<your-tenant-name>.ciamlogin.com",
     "Domain": "<your-tenant-name>.onmicrosoft.com",
     "TenantId": "<your-tenant-id>",
     "ClientId": "<your-api-client-id>",
-    "SignUpSignInPolicyId": "B2C_1_susi",
-    "ResetPasswordPolicyId": "B2C_1_reset",
-    "EditProfilePolicyId": "B2C_1_edit_profile",
+    "SignUpSignInPolicyId": "B2C_1_signupsignin",
     "Scopes": "https://<your-tenant-name>.onmicrosoft.com/biofuel-api/access_as_user"
   }
 }
 ```
 
 Replace:
-- `<your-tenant-name>`: Your B2C tenant name (e.g., `contosob2c`)
+- `<your-tenant-name>`: Your External ID tenant name
 - `<your-tenant-id>`: Your tenant ID (GUID)
 - `<your-api-client-id>`: The Application (client) ID from step 2
+
+**Note:** Microsoft Entra External ID uses `.ciamlogin.com` domain instead of the legacy `.b2clogin.com`
 
 ### 3. Frontend/Client Application Setup
 
 Your client application (web app, mobile app) needs to:
 
-1. **Register as a separate application** in Azure B2C
+1. **Register as a separate application** in Microsoft Entra External ID
    - Go to "App registrations" → "New registration"
    - Name: `BiofuelAiClient`
    - Configure redirect URIs for your client app
@@ -73,7 +66,7 @@ Your client application (web app, mobile app) needs to:
 
 2. **Implement authentication flow**
    - Use MSAL (Microsoft Authentication Library) for your platform
-   - Authenticate users through Azure B2C user flows
+   - Authenticate users through External ID user flows
    - Obtain access tokens for the API
    - Include tokens in API requests: `Authorization: Bearer <token>`
 
@@ -81,17 +74,17 @@ Your client application (web app, mobile app) needs to:
 
 ### Authentication Flow
 
-1. **User Registration** (via Azure B2C)
-   - User signs up through B2C user flow
-   - After successful registration in B2C, call `/api/auth/register` to sync user to local database
+1. **User Registration** (via Microsoft Entra External ID)
+   - User signs up through External ID user flow
+   - After successful registration, user can log in
 
-2. **User Login** (via Azure B2C)
-   - User logs in through B2C user flow
-   - B2C returns an access token
-   - Call `/api/auth/me` to get user info from local database
+2. **User Login** (via Microsoft Entra External ID)
+   - User logs in through External ID user flow
+   - External ID returns an access token
+   - Call `/api/users/me` to sync user to local database
 
 3. **API Requests**
-   - Include the B2C token in the Authorization header
+   - Include the External ID token in the Authorization header
    - Example: `Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...`
 
 ### Authorization Attributes
@@ -150,23 +143,8 @@ public async Task<ActionResult> UploadSiteData(int siteId)
 
 ```bash
 # Get current user info
-curl -X GET "https://localhost:7141/api/auth/me" \
+curl -X GET "https://localhost:7141/api/users/me" \
   -H "Authorization: Bearer <your-token>"
-
-# Register a new user
-curl -X POST "https://localhost:7141/api/auth/register" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <your-token>" \
-  -d '{
-    "email": "user@example.com",
-    "password": "Password123!",
-    "confirmPassword": "Password123!",
-    "firstName": "John",
-    "lastName": "Doe",
-    "companyId": null,
-    "userRole": 2,
-    "isIndividual": true
-  }'
 ```
 
 ## User Roles
@@ -216,13 +194,18 @@ curl -X POST "https://localhost:7141/api/auth/register" \
    - Check that policy name matches user flow name
    - Ensure API scope is included in token
 
-## Next Steps
+1. **401 Unauthorized**
+   - Check token is valid and not expired
+   - Verify External ID configuration in appsettings.json
+   - Ensure token includes required claims
 
-After authentication is working:
+2. **403 Forbidden**
+   - User doesn't have required role
+   - Check user exists in local database
+   - Verify site access in UserSiteAccess table
 
-1. Implement additional controllers (Companies, Sites, Uploads)
-2. Add site-specific authorization checks
-3. Implement data validation and business logic
-4. Set up proper CORS policy for your frontend
-5. Configure logging and monitoring
-6. Update Microsoft.Identity.Web to resolve security advisory
+3. **Token validation errors**
+   - Verify `Instance`, `Domain`, and `TenantId` in config
+   - Check that user flow name matches configuration
+   - Ensure API scope is included in token
+   - Verify using `.ciamlogin.com` domain (not `.b2clogin.com`)
