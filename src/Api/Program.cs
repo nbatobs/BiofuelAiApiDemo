@@ -32,6 +32,7 @@ try
     // Register application services
     builder. Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<ISiteAuthorizationService, SiteAuthorizationService>();
+    builder.Services.AddScoped<IDataIngestionService, DataIngestionService>();
 
     // Configure Microsoft Entra External ID Authentication
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

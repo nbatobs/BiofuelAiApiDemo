@@ -21,17 +21,20 @@ public class SitesController : ControllerBase
     private readonly AppDbContext _context;
     private readonly IUserService _userService;
     private readonly ISiteAuthorizationService _siteAuthService;
+    private readonly IDataIngestionService _dataIngestionService;
     private readonly ILogger<SitesController> _logger;
 
     public SitesController(
         AppDbContext context,
         IUserService userService,
         ISiteAuthorizationService siteAuthService,
+        IDataIngestionService dataIngestionService,
         ILogger<SitesController> logger)
     {
         _context = context;
         _userService = userService;
         _siteAuthService = siteAuthService;
+        _dataIngestionService = dataIngestionService;
         _logger = logger;
     }
 
@@ -216,6 +219,54 @@ public class SitesController : ControllerBase
             .ToListAsync();
 
         return Ok(uploads);
+    }
+
+    /// <summary>
+    /// Upload data rows for a site.
+    /// Supports incremental daily uploads - only new or updated data needs to be sent.
+    /// </summary>
+    /// <param name="siteId">The site ID.</param>
+    /// <param name="request">The data upload request containing rows.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Upload result with statistics and any validation issues.</returns>
+    [HttpPost("{siteId:int}/data")]
+    [ProducesResponseType(typeof(DataUploadResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(DataUploadResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<DataUploadResponse>> UploadData(
+        int siteId,
+        [FromBody] DataUploadRequest request,
+        CancellationToken cancellationToken)
+    {
+        var user = await GetCurrentUserAsync();
+        if (user == null)
+            return Unauthorized();
+
+        // Check if user has write access (Operator or higher)
+        if (!await _siteAuthService.HasSiteRoleAsync(user.Id, siteId, 
+            SiteRole.Owner, SiteRole.SiteAdmin, SiteRole.Operator))
+            return Forbid();
+
+        // Verify site exists
+        var siteExists = await _context.Sites.AnyAsync(s => s.Id == siteId, cancellationToken);
+        if (!siteExists)
+            return NotFound($"Site with ID {siteId} not found");
+
+        _logger.LogInformation(
+            "User {UserId} uploading {RowCount} rows to site {SiteId}",
+            user.Id, request.Rows.Count, siteId);
+
+        var response = await _dataIngestionService.ProcessUploadAsync(
+            siteId, user.Id, request, cancellationToken);
+
+        if (!response.Success)
+        {
+            return BadRequest(response);
+        }
+
+        return Ok(response);
     }
 
     /// <summary>
