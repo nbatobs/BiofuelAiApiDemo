@@ -4,3 +4,184 @@ GET {{Api_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+# ==========================================
+# ADMIN ENDPOINTS
+# ==========================================
+
+### Get all companies
+GET {{Api_HostAddress}}/api/admin/companies
+Accept: application/json
+
+###
+
+### Create a new company
+POST {{Api_HostAddress}}/api/admin/companies
+Content-Type: application/json
+
+{
+    "name": "BioEnergy Corp"
+}
+
+###
+
+### Get company by ID
+GET {{Api_HostAddress}}/api/admin/companies/1
+Accept: application/json
+
+###
+
+### Update company
+PATCH {{Api_HostAddress}}/api/admin/companies/1
+Content-Type: application/json
+
+{
+    "name": "BioEnergy Corporation"
+}
+
+###
+
+### Get all sites
+GET {{Api_HostAddress}}/api/admin/sites
+Accept: application/json
+
+###
+
+### Get sites filtered by company
+GET {{Api_HostAddress}}/api/admin/sites?companyId=1
+Accept: application/json
+
+###
+
+### Create a new site
+POST {{Api_HostAddress}}/api/admin/sites
+Content-Type: application/json
+
+{
+    "companyId": 1,
+    "siteName": "Main Biogas Plant",
+    "location": "Munich, Germany",
+    "timeZone": "Europe/Berlin",
+    "configJson": "{}",
+    "autoInferenceEnabled": false,
+    "autoRetrainingEnabled": false,
+    "trainOnEveryUpload": false
+}
+
+###
+
+### Get site by ID
+GET {{Api_HostAddress}}/api/admin/sites/1
+Accept: application/json
+
+###
+
+### Update site
+PATCH {{Api_HostAddress}}/api/admin/sites/1
+Content-Type: application/json
+
+{
+    "location": "Munich, Bavaria, Germany",
+    "autoInferenceEnabled": true
+}
+
+###
+
+### Get all users
+GET {{Api_HostAddress}}/api/admin/users
+Accept: application/json
+
+###
+
+### Get users filtered by company
+GET {{Api_HostAddress}}/api/admin/users?companyId=1
+Accept: application/json
+
+###
+
+### Create a new user (company user)
+POST {{Api_HostAddress}}/api/admin/users
+Content-Type: application/json
+
+{
+    "email": "operator@bioenergy.com",
+    "name": "John Operator",
+    "companyId": 1,
+    "role": "User",
+    "isIndividual": false
+}
+
+###
+
+### Create an individual user (consultant/trial)
+POST {{Api_HostAddress}}/api/admin/users
+Content-Type: application/json
+
+{
+    "email": "consultant@example.com",
+    "name": "Jane Consultant",
+    "role": "User",
+    "isIndividual": true
+}
+
+###
+
+### Get user by ID
+GET {{Api_HostAddress}}/api/admin/users/1
+Accept: application/json
+
+###
+
+### Update user
+PATCH {{Api_HostAddress}}/api/admin/users/1
+Content-Type: application/json
+
+{
+    "name": "John Senior Operator",
+    "role": "Manager"
+}
+
+###
+
+### Get site access for a site
+GET {{Api_HostAddress}}/api/admin/sites/1/access
+Accept: application/json
+
+###
+
+### Grant user access to a site
+POST {{Api_HostAddress}}/api/admin/sites/1/access
+Content-Type: application/json
+
+{
+    "userId": 1,
+    "role": "Operator"
+}
+
+###
+
+### Revoke user access from a site
+DELETE {{Api_HostAddress}}/api/admin/sites/1/access/1
+
+###
+
+### Get all sites a user has access to
+GET {{Api_HostAddress}}/api/admin/users/1/sites
+Accept: application/json
+
+###
+
+### Delete user
+DELETE {{Api_HostAddress}}/api/admin/users/1
+
+###
+
+### Delete site
+DELETE {{Api_HostAddress}}/api/admin/sites/1
+
+###
+
+### Delete company
+DELETE {{Api_HostAddress}}/api/admin/companies/1
+
+###
