@@ -11,6 +11,7 @@ public class SiteListDto
     public string SiteName { get; set; } = string.Empty;
     public string CompanyName { get; set; } = string.Empty;
     public string? Location { get; set; }
+    public SiteStatus Status { get; set; }
     public SiteRole? UserRole { get; set; }
     public DateTime? LastDataUpload { get; set; }
     public bool AutoInferenceEnabled { get; set; }

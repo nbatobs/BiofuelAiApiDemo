@@ -186,6 +186,9 @@ public class AdminController : ControllerBase
                 s.SiteName,
                 s.Location,
                 s.TimeZone,
+                s.Status,
+                s.OnboardingNotes,
+                s.ActivatedAt,
                 s.AutoInferenceEnabled,
                 s.AutoRetrainingEnabled,
                 _context.UserSiteAccesses.Count(usa => usa.SiteId == s.Id),
@@ -215,6 +218,9 @@ public class AdminController : ControllerBase
                 s.SiteName,
                 s.Location,
                 s.TimeZone,
+                s.Status,
+                s.OnboardingNotes,
+                s.ActivatedAt,
                 s.AutoInferenceEnabled,
                 s.AutoRetrainingEnabled,
                 _context.UserSiteAccesses.Count(usa => usa.SiteId == s.Id),
@@ -254,6 +260,8 @@ public class AdminController : ControllerBase
             Location = request.Location,
             TimeZone = request.TimeZone ?? "UTC",
             ConfigJson = request.ConfigJson ?? "{}",
+            Status = SiteStatus.PendingSetup,
+            OnboardingNotes = request.OnboardingNotes,
             AutoInferenceEnabled = request.AutoInferenceEnabled,
             AutoRetrainingEnabled = request.AutoRetrainingEnabled,
             RetrainingFrequencyDays = request.RetrainingFrequencyDays,
@@ -275,6 +283,9 @@ public class AdminController : ControllerBase
             site.SiteName,
             site.Location,
             site.TimeZone,
+            site.Status,
+            site.OnboardingNotes,
+            site.ActivatedAt,
             site.AutoInferenceEnabled,
             site.AutoRetrainingEnabled,
             0,
@@ -314,6 +325,18 @@ public class AdminController : ControllerBase
         if (request.Location != null) site.Location = request.Location;
         if (request.TimeZone != null) site.TimeZone = request.TimeZone;
         if (request.ConfigJson != null) site.ConfigJson = request.ConfigJson;
+        if (request.OnboardingNotes != null) site.OnboardingNotes = request.OnboardingNotes;
+        if (request.Status.HasValue)
+        {
+            var previousStatus = site.Status;
+            site.Status = request.Status.Value;
+            
+            // Set ActivatedAt when transitioning to Active
+            if (request.Status.Value == SiteStatus.Active && previousStatus != SiteStatus.Active)
+            {
+                site.ActivatedAt = DateTime.UtcNow;
+            }
+        }
         if (request.AutoInferenceEnabled.HasValue) site.AutoInferenceEnabled = request.AutoInferenceEnabled.Value;
         if (request.AutoRetrainingEnabled.HasValue) site.AutoRetrainingEnabled = request.AutoRetrainingEnabled.Value;
         if (request.RetrainingFrequencyDays.HasValue) site.RetrainingFrequencyDays = request.RetrainingFrequencyDays;
@@ -332,6 +355,65 @@ public class AdminController : ControllerBase
             site.SiteName,
             site.Location,
             site.TimeZone,
+            site.Status,
+            site.OnboardingNotes,
+            site.ActivatedAt,
+            site.AutoInferenceEnabled,
+            site.AutoRetrainingEnabled,
+            await _context.UserSiteAccesses.CountAsync(usa => usa.SiteId == siteId),
+            site.CreatedAt,
+            site.UpdatedAt
+        );
+
+        return Ok(dto);
+    }
+
+    /// <summary>
+    /// Update a site's onboarding status.
+    /// </summary>
+    [HttpPatch("sites/{siteId:int}/status")]
+    public async Task<ActionResult<AdminSiteDto>> UpdateSiteStatus(
+        int siteId,
+        [FromBody] UpdateSiteStatusRequest request)
+    {
+        var site = await _context.Sites
+            .Include(s => s.Company)
+            .FirstOrDefaultAsync(s => s.Id == siteId);
+
+        if (site == null)
+            return NotFound(new { message = $"Site with ID {siteId} not found" });
+
+        var previousStatus = site.Status;
+        site.Status = request.Status;
+
+        // Set ActivatedAt when transitioning to Active
+        if (request.Status == SiteStatus.Active && previousStatus != SiteStatus.Active)
+        {
+            site.ActivatedAt = DateTime.UtcNow;
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Notes))
+        {
+            site.OnboardingNotes = request.Notes;
+        }
+
+        site.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Updated site {SiteId} status from {OldStatus} to {NewStatus}",
+            siteId, previousStatus, request.Status);
+
+        var dto = new AdminSiteDto(
+            site.Id,
+            site.CompanyId,
+            site.Company.Name,
+            site.SiteName,
+            site.Location,
+            site.TimeZone,
+            site.Status,
+            site.OnboardingNotes,
+            site.ActivatedAt,
             site.AutoInferenceEnabled,
             site.AutoRetrainingEnabled,
             await _context.UserSiteAccesses.CountAsync(usa => usa.SiteId == siteId),

@@ -15,6 +15,11 @@ public class SiteDetailDto
     public string? TimeZone { get; set; }
     public SiteRole? UserRole { get; set; }
     
+    // Onboarding status
+    public SiteStatus Status { get; set; }
+    public string? OnboardingNotes { get; set; }
+    public DateTime? ActivatedAt { get; set; }
+    
     // Automation settings
     public bool AutoInferenceEnabled { get; set; }
     public TimeSpan? InferenceSchedule { get; set; }

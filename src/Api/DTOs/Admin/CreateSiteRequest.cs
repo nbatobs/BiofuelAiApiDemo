@@ -16,6 +16,8 @@ public record CreateSiteRequest(
     
     string? ConfigJson,
     
+    string? OnboardingNotes,
+    
     bool AutoInferenceEnabled = false,
     
     bool AutoRetrainingEnabled = false,

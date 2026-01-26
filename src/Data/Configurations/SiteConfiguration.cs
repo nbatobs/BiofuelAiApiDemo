@@ -31,6 +31,14 @@ public class SiteConfiguration : IEntityTypeConfiguration<Site>
         builder.Property(s => s.PowerBiWorkspaceId)
             .HasMaxLength(100);
 
+        builder.Property(s => s.Status)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(50);
+
+        builder.Property(s => s.OnboardingNotes)
+            .HasMaxLength(2000);
+
         // Relationships
         builder.HasOne(s => s.Company)
             .WithMany()
@@ -47,5 +55,7 @@ public class SiteConfiguration : IEntityTypeConfiguration<Site>
         builder.HasIndex(s => s.CompanyId);
 
         builder.HasIndex(s => s.CurrentSchemaVersionId);
+
+        builder.HasIndex(s => s.Status);  // For filtering by onboarding status
     }
 }

@@ -62,6 +62,7 @@ public class SitesController : ControllerBase
                 SiteName = s.SiteName,
                 CompanyName = s.Company.Name,
                 Location = s.Location,
+                Status = s.Status,
                 LastDataUpload = _context.Uploads
                     .Where(u => u.SiteId == s.Id)
                     .OrderByDescending(u => u.UploadedAt)
@@ -162,6 +163,9 @@ public class SitesController : ControllerBase
             Location = site.Location,
             TimeZone = site.TimeZone,
             UserRole = userRole,
+            Status = site.Status,
+            OnboardingNotes = site.OnboardingNotes,
+            ActivatedAt = site.ActivatedAt,
             AutoInferenceEnabled = site.AutoInferenceEnabled,
             InferenceSchedule = site.InferenceSchedule,
             AutoRetrainingEnabled = site.AutoRetrainingEnabled,

@@ -1,5 +1,7 @@
 namespace Data.Models;
 
+using Data.Models.Enums;
+
 public class Site
 {
     public int Id { get; set; }
@@ -10,6 +12,11 @@ public class Site
     public required string SiteName { get; set; }
     public string? Location { get; set; }
     public string? TimeZone { get; set; } // e.g. "America/New_York"
+    
+    // Onboarding status
+    public SiteStatus Status { get; set; } = SiteStatus.PendingSetup;
+    public string? OnboardingNotes { get; set; }  // Admin notes during setup
+    public DateTime? ActivatedAt { get; set; }    // When site went live
     
     public int? CurrentSchemaVersionId { get; set; }
     

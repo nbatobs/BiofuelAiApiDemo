@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Data.Models.Enums;
 
 namespace Api.DTOs.Admin;
 
@@ -11,6 +12,10 @@ public record UpdateSiteRequest(
     string? TimeZone,
     
     string? ConfigJson,
+    
+    SiteStatus? Status,
+    
+    string? OnboardingNotes,
     
     bool? AutoInferenceEnabled,
     

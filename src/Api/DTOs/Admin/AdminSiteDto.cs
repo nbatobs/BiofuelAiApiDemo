@@ -1,3 +1,5 @@
+using Data.Models.Enums;
+
 namespace Api.DTOs.Admin;
 
 public record AdminSiteDto(
@@ -7,6 +9,9 @@ public record AdminSiteDto(
     string SiteName,
     string? Location,
     string? TimeZone,
+    SiteStatus Status,
+    string? OnboardingNotes,
+    DateTime? ActivatedAt,
     bool AutoInferenceEnabled,
     bool AutoRetrainingEnabled,
     int UserCount,
