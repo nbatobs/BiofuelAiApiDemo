@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<DataValidationRule> DataValidationRules { get; set; }
     public DbSet<DataRow> DataRows { get; set; }
     public DbSet<Upload> Uploads { get; set; }
+    public DbSet<PendingSiteUpload> PendingSiteUploads { get; set; }
     public DbSet<ModelVersion> ModelVersions { get; set; }
     public DbSet<PredictionResult> PredictionResults { get; set; }
     public DbSet<InferenceRequest> InferenceRequests { get; set; }

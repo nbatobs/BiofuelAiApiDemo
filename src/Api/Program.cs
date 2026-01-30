@@ -4,8 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi;
 using Api.Services;
+using Api.Interfaces;
 using Serilog;
-using System. Reflection;
+using System.Reflection;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -30,9 +31,22 @@ try
     builder.Services.AddEndpointsApiExplorer();
 
     // Register application services
-    builder. Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<ISiteAuthorizationService, SiteAuthorizationService>();
     builder.Services.AddScoped<IDataIngestionService, DataIngestionService>();
+
+    // Register Python API client for header mapping
+    builder.Services.AddHttpClient<IHeaderMappingService, HeaderMappingService>(client =>
+    {
+        var pythonApiBaseUrl = builder.Configuration["PythonApi:BaseUrl"] ?? "http://localhost:8000";
+        client.BaseAddress = new Uri(pythonApiBaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(120); // Allow time for AI processing
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+    {
+        // For development - in production use proper certificates
+        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+    });
 
     // Configure Microsoft Entra External ID Authentication
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
